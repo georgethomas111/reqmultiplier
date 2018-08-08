@@ -1,46 +1,69 @@
 package multiconn
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
+	"net/url"
+	"os"
 )
 
 type MultiConn struct {
-	destAddres []string
-	destConns  []net.Conn
+	destURL []*url.URL
 }
 
 // New
-// dial to the address and save the address
-func New(proto string, destAddres []string) *MultiConn {
-	var conns []net.Conn
+func New(proto string, destAddres []string) (*MultiConn, error) {
+	var urls []*url.URL
 	for _, addr := range destAddres {
-		c, err := net.Dial(proto, addr)
+		u, err := url.ParseRequestURI(addr)
 		if err != nil {
-			log.Println("Connecton error to dest", err.Error())
-			continue
+			return nil, errors.New("parsing error - " + err.Error())
 		}
-
-		conns = append(conns, c)
+		urls = append(urls, u)
 	}
 
-	return &MultiConn{
-		destAddres: destAddres,
-		destConns:  conns,
+	m := &MultiConn{
+		destURL: urls,
 	}
+
+	return m, nil
 }
 
-func (m *MultiConn) SendConn(conn net.Conn) error {
-	data, err := ioutil.ReadAll(conn)
+// HandleConnection
+func (m *MultiConn) HandleConnection(conn net.Conn) error {
+	// Close the connection what ever be the case.
+	defer conn.Close()
+	reader := bufio.NewReader(conn)
+	writer := bufio.NewWriter(conn)
+	//	req, err := http.ReadRequest(reader)
+	//	if err != nil {
+	//		return errors.New("HandleConnection Http - " + err.Error())
+	//	}
+	d, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
 	}
 
-	for _, destConn := range m.destConns {
-		fmt.Fprintf(destConn, "%s", data)
-	}
+	fmt.Fprintf(os.Stdout, string(d))
+
+	//	for _, u := range m.destURL {
+	// update the url to be the destination URL.
+	//	req.URL = u
+	//	fmt.Println("Request URI", req.RequestURI)
+	//	req.RequestURI = ""
+	//	resp, err := http.DefaultClient.Do(req)
+	//	if err != nil {
+	//		return errors.New("Client do http - " + err.Error())
+	//	}
+
+	fmt.Fprintf(writer, "abcd")
+	//	if err != nil {
+	//		return errors.New("Writer error - " + err.Error())
+	//	}
+	//	}
 
 	return nil
 }

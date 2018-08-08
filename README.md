@@ -11,3 +11,6 @@ The proxying is happening in the ip-layer.
 req -> multiplexer -
                     --> actual-service
 ```
+
+So the trick here is to make sure the HTTP request that is received 
+by the TCP server should first write it into a buffer.
