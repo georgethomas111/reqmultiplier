@@ -1,9 +1,11 @@
 # README
 
-Request multiplier multiplies the request that is sent to the server by 
-acting as a reverse proxy which makes 2 requests to the http server.
+Request multiplier multiplies the requests by making multiple requests 
+to the destination server. 
 
-The proxying is happening in the ip-layer.
+This can be thought of like a curl command which can be used to send 
+multiple requests. 
+
 
 # DESIGN
 ```
@@ -12,5 +14,20 @@ req -> multiplexer -
                     --> actual-service
 ```
 
-So the trick here is to make sure the HTTP request that is received 
-by the TCP server should first write it into a buffer.
+# INSTALL
+```
+(xenial)george@localhost:~/workspace/src/github.com/georgethomas111/reqmultiplier$ go install github.com/georgethomas111/reqmultiplier
+(xenial)george@localhost:~/workspace/src/github.com/georgethomas111/reqmultiplier$ reqmultiplier -help
+Usage of reqmultiplier:
+  -destURL string
+        URL to hit. (default "http://google.com")
+  -multiply int
+        Number of times to multiply request. (default 10)
+  -proto string
+        Protocol to use. (default "GET")
+  -reqBody string
+        Request body to send.
+  -timeout int
+        timeout between requests.
+(xenial)george@localhost:~/workspace/src/github.com/georgethomas111/reqmultiplier$ 
+```
